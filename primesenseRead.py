@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-# primesenseRead by Liu Jiang, Tsinghua University
+# primesenseRead tested on Ubuntu System
 # Type 's' to save the images in current directory
 # with name 'color/depth_[CURRENR_TIME]'.
 # Required to copy link-library 'openni2' to directory 'primesense'
-# Copyleft(c)
+# Copyleft(c), Liu Jiang, Tsinghua University
 
 from __future__ import print_function
 from primesense import openni2
