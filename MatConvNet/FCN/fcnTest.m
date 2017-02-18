@@ -1,23 +1,20 @@
 function info = fcnTest(varargin)
-%fcnTest tests the fcn on an image
-%hanse: hand segmentation in ego-centric videos
+% fcnTest tests the fcn on an image
+% Modified for the test of fcn32-hand model
 
 run matconvnet/matlab/vl_setupnn ;
 addpath matconvnet/examples ;
 
 % experiment and data paths
-opts.expDir = 'data/fcn8s-edsh' ;
+opts.expDir = 'data/fcn32s-hand-edsh' ;
 opts.dataDir = 'data/EDSH' ;
-opts.modelPath = 'data/fcn8s-edsh/pascal-fcn8s-dag.mat' ;
-opts.modelFamily = 'ModelZoo' ;
+opts.modelPath = fullfile(opts.expDir, 'fcn32s-hand.mat') ;
+opts.modelFamily = 'matconvnet' ;
 [opts, varargin] = vl_argparse(opts, varargin) ;
 
 % experiment setup
 opts.imdbPath = fullfile(opts.expDir, 'imdb.mat') ;
-opts.vocEdition = '12' ;
-opts.vocAdditionalSegmentations = false ;
-opts.vocAdditionalSegmentationsMergeMode = 2 ;
-opts.gpus = [2,3,1] ;% use gpu No. 2
+opts.gpus = [] ;
 opts = vl_argparse(opts, varargin) ;
 
 % result path
@@ -61,9 +58,8 @@ switch opts.modelFamily
   %trained in this original example of FCNTrain
   case 'matconvnet'
     net = load(opts.modelPath) ;
-    net = dagnn.DagNN.loadobj(net) ;
+    net = dagnn.DagNN.loadobj(net.net) ;
     net.mode = 'test' ;
-    annotated for pascal model downloaded directly
     for name = {'objective', 'accuracy'}
       net.removeLayer(name) ;
     end
@@ -151,9 +147,10 @@ for i = 1:numel(val)
   % Accumulate errors
   %zero area as the edge will not be counted
   lb_ = lb + 1 ;
-  pred_ = uint8(pred > 1) ;
-  pred_ = pred_ + 1 ;
-  lb = lb * 255;
+  pred_ = uint8(pred) ;
+  pred = pred_ - 1 ;
+  pred = pred * 255 ;
+  lb = lb * 255 ;
   
   %temporarily set 2
   confusion = confusion + accumarray([lb_(:),pred_(:)],1,[2 2]) ;
@@ -190,7 +187,7 @@ for i = 1:numel(val)
   
   % Save segmentation
   imPath = fullfile(opts.expDir, [name '.png']) ;
-  imwrite(pred,labelColors(),imPath,'png');
+  imwrite(pred,imPath,'png');
 end
 
 % Save results
